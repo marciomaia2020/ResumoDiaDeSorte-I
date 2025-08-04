@@ -369,12 +369,15 @@
             } catch (error) {
                 console.error('Erro detalhado ao buscar último concurso:', error);
                 
-                // Fallback: usar último concurso conhecido (1097)
-                // Se a API falhar, usar o último concurso conhecido
-                const ultimoConhecido = 1097;
+                // Fallback: tentar estimar baseado na data atual
+                // Dia de Sorte começou em 2018, aproximadamente 3 sorteios por semana
+                const dataInicio = new Date('2018-05-19'); // Data aproximada do primeiro concurso
+                const dataAtual = new Date();
+                const diasDecorridos = Math.floor((dataAtual - dataInicio) / (1000 * 60 * 60 * 24));
+                const concursoEstimado = Math.floor(diasDecorridos / 2.3); // Aproximadamente 3 por semana
                 
-                console.log(`Usando fallback: último concurso conhecido ${ultimoConhecido}`);
-                return ultimoConhecido;
+                console.log(`Usando fallback: concurso estimado ${concursoEstimado}`);
+                return Math.max(concursoEstimado, 1000); // Garantir um número mínimo razoável
             }
         }
 
@@ -414,7 +417,6 @@
                     fim = await buscarUltimoConcurso();
                     if (!fim) throw new Error('Não foi possível determinar o último concurso');
                     ultimoConcursoNumero = fim;
-                    concursoFim.value = fim; // Atualizar o campo visual
                 }
 
                 // Validações
@@ -470,8 +472,8 @@
                     throw new Error('Carregamento cancelado pelo usuário');
                 }
 
-                // Ordenar final em ordem decrescente (último primeiro)
-                todosResultados.sort((a, b) => b.numero - a.numero);
+                // Ordenar final
+                todosResultados.sort((a, b) => a.numero - b.numero);
 
                 if (todosResultados.length === 0) {
                     throw new Error('Nenhum resultado encontrado');
@@ -560,10 +562,7 @@
         function exibirTodosResultados() {
             tabelaBody.innerHTML = '';
 
-            // Criar uma cópia ordenada em ordem decrescente apenas para exibição
-            const resultadosParaExibir = [...todosResultados].sort((a, b) => b.numero - a.numero);
-
-            resultadosParaExibir.forEach(data => {
+            todosResultados.forEach(data => {
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-gray-50 dark:hover:bg-gray-700';
                 row.dataset.concurso = data.numero;

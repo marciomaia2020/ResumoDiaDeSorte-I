@@ -267,6 +267,36 @@
             </div>
         </div>
 
+        <!-- Resumo Estatístico -->
+        <div id="resumoEstatistico" class="hidden mt-8 bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900 dark:to-yellow-900 border border-orange-200 dark:border-orange-700 rounded-lg p-6">
+            <h3 class="text-xl font-bold text-orange-800 dark:text-orange-200 mb-6 text-center">
+                📊 Resumo Estatístico Par/Ímpar
+            </h3>
+            <div id="estatisticasGerais" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Estatísticas serão inseridas aqui -->
+            </div>
+            
+            <!-- Gráfico visual simples -->
+            <div class="mt-6 p-4 bg-white dark:bg-gray-800 rounded-lg">
+                <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 text-center">
+                    🎯 Distribuição de Padrões
+                </h4>
+                <div id="graficoBarras" class="space-y-3">
+                    <!-- Gráfico de barras será inserido aqui -->
+                </div>
+            </div>
+            
+            <!-- Padrões encontrados -->
+            <div class="mt-6 p-4 bg-white dark:bg-gray-800 rounded-lg">
+                <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 text-center">
+                    🔍 Padrões Identificados
+                </h4>
+                <div id="padroes" class="text-sm text-gray-700 dark:text-gray-300">
+                    <!-- Padrões serão inseridos aqui -->
+                </div>
+            </div>
+        </div>
+
         <!-- Informações Adicionais -->
         <div id="infoAdicional" class="hidden mt-8 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg p-6">
             <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-4">
@@ -496,6 +526,7 @@
 
                 loadingText.textContent = `✅ Carregados ${todosResultados.length} concursos com sucesso!`;
                 exibirTodosResultados();
+                gerarResumoEstatistico();
                 
             } catch (error) {
                 console.error('Erro ao buscar resultados:', error);
@@ -815,6 +846,139 @@
         concursoFim.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') buscarResultados();
         });
+
+        // Função para gerar resumo estatístico
+        function gerarResumoEstatistico() {
+            if (todosResultados.length === 0) return;
+
+            const resumoDiv = document.getElementById('resumoEstatistico');
+            const estatisticasDiv = document.getElementById('estatisticasGerais');
+            const graficoDiv = document.getElementById('graficoBarras');
+            const padroesDiv = document.getElementById('padroes');
+
+            // Calcular estatísticas
+            let totalPares = 0, totalImpares = 0;
+            let concursosMaioriaPares = 0, concursosMaioriaImpares = 0, concursosEquilibrados = 0;
+            const padroesCombinacoes = {};
+
+            todosResultados.forEach(resultado => {
+                const stats = calcularEstatisticasParImpar(resultado.dezenasSorteadasOrdemSorteio);
+                totalPares += stats.pares;
+                totalImpares += stats.impares;
+
+                if (stats.maioria === 'pares') concursosMaioriaPares++;
+                else if (stats.maioria === 'impares') concursosMaioriaImpares++;
+                else concursosEquilibrados++;
+
+                // Contar padrões específicos
+                const padrao = stats.texto;
+                padroesCombinacoes[padrao] = (padroesCombinacoes[padrao] || 0) + 1;
+            });
+
+            const totalConcursos = todosResultados.length;
+            const percPares = ((concursosMaioriaPares / totalConcursos) * 100).toFixed(1);
+            const percImpares = ((concursosMaioriaImpares / totalConcursos) * 100).toFixed(1);
+            const percEquilibrados = ((concursosEquilibrados / totalConcursos) * 100).toFixed(1);
+
+            // Cards estatísticos
+            estatisticasDiv.innerHTML = `
+                <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-blue-600 dark:text-blue-300">${concursosMaioriaPares}</div>
+                    <div class="text-sm text-blue-800 dark:text-blue-200">Concursos com</div>
+                    <div class="text-sm font-semibold text-blue-800 dark:text-blue-200">Maioria Pares</div>
+                    <div class="text-xs text-blue-600 dark:text-blue-400">${percPares}%</div>
+                </div>
+                <div class="bg-green-50 dark:bg-green-900 p-4 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-green-600 dark:text-green-300">${concursosMaioriaImpares}</div>
+                    <div class="text-sm text-green-800 dark:text-green-200">Concursos com</div>
+                    <div class="text-sm font-semibold text-green-800 dark:text-green-200">Maioria Ímpares</div>
+                    <div class="text-xs text-green-600 dark:text-green-400">${percImpares}%</div>
+                </div>
+                <div class="bg-yellow-50 dark:bg-yellow-900 p-4 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-300">${concursosEquilibrados}</div>
+                    <div class="text-sm text-yellow-800 dark:text-yellow-200">Concursos</div>
+                    <div class="text-sm font-semibold text-yellow-800 dark:text-yellow-200">Equilibrados</div>
+                    <div class="text-xs text-yellow-600 dark:text-yellow-400">${percEquilibrados}%</div>
+                </div>
+                <div class="bg-orange-50 dark:bg-orange-900 p-4 rounded-lg text-center">
+                    <div class="text-lg font-bold text-orange-600 dark:text-orange-300">${totalPares}P / ${totalImpares}I</div>
+                    <div class="text-sm text-orange-800 dark:text-orange-200">Total de</div>
+                    <div class="text-sm font-semibold text-orange-800 dark:text-orange-200">Números Sorteados</div>
+                    <div class="text-xs text-orange-600 dark:text-orange-400">${totalConcursos} concursos</div>
+                </div>
+            `;
+
+            // Gráfico de barras visual
+            const maxValor = Math.max(concursosMaioriaPares, concursosMaioriaImpares, concursosEquilibrados);
+            graficoDiv.innerHTML = `
+                <div class="flex items-center">
+                    <div class="w-20 text-sm text-gray-600 dark:text-gray-400">Maioria Pares:</div>
+                    <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 mx-3">
+                        <div class="bg-blue-500 h-6 rounded-full flex items-center justify-end pr-2" style="width: ${(concursosMaioriaPares/maxValor)*100}%">
+                            <span class="text-xs text-white font-bold">${concursosMaioriaPares}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-20 text-sm text-gray-600 dark:text-gray-400">Maioria Ímpares:</div>
+                    <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 mx-3">
+                        <div class="bg-green-500 h-6 rounded-full flex items-center justify-end pr-2" style="width: ${(concursosMaioriaImpares/maxValor)*100}%">
+                            <span class="text-xs text-white font-bold">${concursosMaioriaImpares}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-20 text-sm text-gray-600 dark:text-gray-400">Equilibrados:</div>
+                    <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 mx-3">
+                        <div class="bg-yellow-500 h-6 rounded-full flex items-center justify-end pr-2" style="width: ${(concursosEquilibrados/maxValor)*100}%">
+                            <span class="text-xs text-white font-bold">${concursosEquilibrados}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Padrões mais comuns
+            const padroesOrdenados = Object.entries(padroesCombinacoes)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 10);
+
+            let padroesMaisComuns = '<div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-4">';
+            padroesOrdenados.forEach(([padrao, count]) => {
+                const perc = ((count / totalConcursos) * 100).toFixed(1);
+                padroesMaisComuns += `
+                    <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded text-center">
+                        <div class="font-bold text-sm">${padrao}</div>
+                        <div class="text-xs text-gray-600 dark:text-gray-400">${count}x (${perc}%)</div>
+                    </div>
+                `;
+            });
+            padroesMaisComuns += '</div>';
+
+            // Análises e insights
+            let insights = '';
+            if (concursosMaioriaPares > concursosMaioriaImpares) {
+                const diferenca = concursosMaioriaPares - concursosMaioriaImpares;
+                insights += `<p><strong>🔍 Tendência:</strong> Há uma ligeira tendência para concursos com maioria de números pares (${diferenca} concursos a mais).</p>`;
+            } else if (concursosMaioriaImpares > concursosMaioriaPares) {
+                const diferenca = concursosMaioriaImpares - concursosMaioriaPares;
+                insights += `<p><strong>🔍 Tendência:</strong> Há uma ligeira tendência para concursos com maioria de números ímpares (${diferenca} concursos a mais).</p>`;
+            } else {
+                insights += `<p><strong>🔍 Equilíbrio:</strong> Os concursos estão perfeitamente equilibrados entre maioria pares e ímpares.</p>`;
+            }
+
+            const padraoMaisComum = padroesOrdenados[0];
+            if (padraoMaisComum) {
+                insights += `<p><strong>📊 Padrão mais comum:</strong> ${padraoMaisComum[0]} apareceu em ${padraoMaisComum[1]} concursos (${((padraoMaisComum[1]/totalConcursos)*100).toFixed(1)}%).</p>`;
+            }
+
+            if (concursosEquilibrados > 0) {
+                insights += `<p><strong>⚖️ Concursos equilibrados:</strong> ${concursosEquilibrados} concursos tiveram exatamente a mesma quantidade de pares e ímpares.</p>`;
+            }
+
+            padroesDiv.innerHTML = padroesMaisComuns + insights;
+
+            resumoDiv.classList.remove('hidden');
+        }
 
         // 🚀 CARREGAR TODOS OS CONCURSOS AUTOMATICAMENTE AO ABRIR A APP
         document.addEventListener('DOMContentLoaded', async () => {

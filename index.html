@@ -768,7 +768,7 @@
                         const celula = row.querySelector(`td[data-coluna="${index + 1}"]`);
                         if (celula) {
                             const numero = celula.textContent.trim();
-                            // Filtro mais flexível - suporta múltiplos números separados por vírgula
+                            // Filtro mais fxível - suporta múltiplos números separados por vírgula
                             const numerosFiltro = filtro.split(',').map(n => n.trim());
                             const encontrou = numerosFiltro.some(nf => {
                                 // Suporta busca exata ou parcial

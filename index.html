@@ -286,6 +286,16 @@
                 </div>
             </div>
             
+            <!-- Estatísticas por posição (só quando ordem original) -->
+            <div id="estatisticasPosicao" class="hidden mt-6 p-4 bg-white dark:bg-gray-800 rounded-lg">
+                <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 text-center">
+                    🎯 Estatísticas por Posição (Ordem Original do Sorteio)
+                </h4>
+                <div id="dadosPosicoes" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <!-- Dados por posição serão inseridos aqui -->
+                </div>
+            </div>
+
             <!-- Padrões encontrados -->
             <div class="mt-6 p-4 bg-white dark:bg-gray-800 rounded-lg">
                 <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 text-center">
@@ -768,7 +778,7 @@
                         const celula = row.querySelector(`td[data-coluna="${index + 1}"]`);
                         if (celula) {
                             const numero = celula.textContent.trim();
-                            // Filtro mais fxível - suporta múltiplos números separados por vírgula
+                            // Filtro mais flexível - suporta múltiplos números separados por vírgula
                             const numerosFiltro = filtro.split(',').map(n => n.trim());
                             const encontrou = numerosFiltro.some(nf => {
                                 // Suporta busca exata ou parcial
@@ -828,6 +838,7 @@
         ordenarCrescente.addEventListener('change', () => {
             if (todosResultados.length > 0) {
                 exibirTodosResultados();
+                gerarResumoEstatistico(); // Atualizar estatísticas quando mudar a ordenação
             }
         });
 
@@ -847,6 +858,52 @@
             if (e.key === 'Enter') buscarResultados();
         });
 
+        // Função para calcular estatísticas por posição
+        function calcularEstatisticasPorPosicao() {
+            const estatisticasPorPosicao = {};
+            
+            // Inicializar estrutura para cada posição (1-7)
+            for (let pos = 1; pos <= 7; pos++) {
+                estatisticasPorPosicao[pos] = {};
+                // Inicializar contadores para números 1-31
+                for (let num = 1; num <= 31; num++) {
+                    estatisticasPorPosicao[pos][num] = 0;
+                }
+            }
+            
+            // Contar ocorrências por posição (ordem original do sorteio)
+            todosResultados.forEach(resultado => {
+                if (resultado.dezenasSorteadasOrdemSorteio && resultado.dezenasSorteadasOrdemSorteio.length >= 7) {
+                    resultado.dezenasSorteadasOrdemSorteio.forEach((numero, index) => {
+                        const posicao = index + 1; // Posições 1-7
+                        if (posicao <= 7 && numero >= 1 && numero <= 31) {
+                            estatisticasPorPosicao[posicao][numero]++;
+                        }
+                    });
+                }
+            });
+            
+            // Calcular mais e menos frequentes por posição
+            const resultadoPorPosicao = {};
+            for (let pos = 1; pos <= 7; pos++) {
+                const contadores = estatisticasPorPosicao[pos];
+                const numerosOrdenados = Object.entries(contadores)
+                    .filter(([num, count]) => count > 0) // Apenas números que apareceram
+                    .sort(([,a], [,b]) => b - a); // Ordenar por frequência (maior primeiro)
+                
+                const maisFrequente = numerosOrdenados[0] || ['N/A', 0];
+                const menosFrequente = numerosOrdenados[numerosOrdenados.length - 1] || ['N/A', 0];
+                
+                resultadoPorPosicao[pos] = {
+                    mais: { numero: parseInt(maisFrequente[0]), freq: maisFrequente[1] },
+                    menos: { numero: parseInt(menosFrequente[0]), freq: menosFrequente[1] },
+                    todos: numerosOrdenados
+                };
+            }
+            
+            return resultadoPorPosicao;
+        }
+
         // Função para gerar resumo estatístico
         function gerarResumoEstatistico() {
             if (todosResultados.length === 0) return;
@@ -855,6 +912,8 @@
             const estatisticasDiv = document.getElementById('estatisticasGerais');
             const graficoDiv = document.getElementById('graficoBarras');
             const padroesDiv = document.getElementById('padroes');
+            const estatisticasPosicaoDiv = document.getElementById('estatisticasPosicao');
+            const dadosPosicoes = document.getElementById('dadosPosicoes');
 
             // Calcular estatísticas
             let totalPares = 0, totalImpares = 0;
@@ -976,6 +1035,45 @@
             }
 
             padroesDiv.innerHTML = padroesMaisComuns + insights;
+
+            // Mostrar estatísticas por posição apenas quando "Ordenar dezenas crescente" está desmarcado
+            if (!ordenarCrescente.checked) {
+                const estatisticasPorPosicao = calcularEstatisticasPorPosicao();
+                
+                let cardsPosicoesHTML = '';
+                for (let pos = 1; pos <= 7; pos++) {
+                    const dados = estatisticasPorPosicao[pos];
+                    const percMais = ((dados.mais.freq / totalConcursos) * 100).toFixed(1);
+                    const percMenos = ((dados.menos.freq / totalConcursos) * 100).toFixed(1);
+                    
+                    cardsPosicoesHTML += `
+                        <div class="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900 p-4 rounded-lg border border-purple-200 dark:border-purple-700">
+                            <h5 class="font-bold text-center text-purple-800 dark:text-purple-200 mb-3">🎱 Bola ${pos}</h5>
+                            <div class="space-y-2">
+                                <div class="bg-green-100 dark:bg-green-800 p-2 rounded">
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold text-green-700 dark:text-green-200">${dados.mais.numero}</div>
+                                        <div class="text-xs text-green-600 dark:text-green-300">Mais sorteado</div>
+                                        <div class="text-xs text-green-500 dark:text-green-400">${dados.mais.freq}x (${percMais}%)</div>
+                                    </div>
+                                </div>
+                                <div class="bg-red-100 dark:bg-red-800 p-2 rounded">
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold text-red-700 dark:text-red-200">${dados.menos.numero}</div>
+                                        <div class="text-xs text-red-600 dark:text-red-300">Menos sorteado</div>
+                                        <div class="text-xs text-red-500 dark:text-red-400">${dados.menos.freq}x (${percMenos}%)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                dadosPosicoes.innerHTML = cardsPosicoesHTML;
+                estatisticasPosicaoDiv.classList.remove('hidden');
+            } else {
+                estatisticasPosicaoDiv.classList.add('hidden');
+            }
 
             resumoDiv.classList.remove('hidden');
         }

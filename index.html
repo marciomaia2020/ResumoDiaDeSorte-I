@@ -241,6 +241,9 @@
                                     </div>
                                 </th>
                                 <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Estatística P/I
+                                </th>
+                                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                     Mês da Sorte
                                 </th>
                             </tr>
@@ -593,6 +596,31 @@
             }
         }
 
+        // Função para calcular estatísticas par/ímpar
+        function calcularEstatisticasParImpar(numeros) {
+            if (!numeros || !Array.isArray(numeros)) {
+                return { pares: 0, impares: 0, texto: 'N/A' };
+            }
+            
+            let pares = 0;
+            let impares = 0;
+            
+            numeros.forEach(numero => {
+                if (numero % 2 === 0) {
+                    pares++;
+                } else {
+                    impares++;
+                }
+            });
+            
+            return { 
+                pares, 
+                impares, 
+                texto: `${pares}P/${impares}I`,
+                maioria: pares > impares ? 'pares' : (impares > pares ? 'impares' : 'equilibrado')
+            };
+        }
+
         // Função para exibir todos os resultados na tabela
         function exibirTodosResultados() {
             tabelaBody.innerHTML = '';
@@ -645,6 +673,29 @@
                         row.appendChild(cellNumero);
                     });
                 }
+
+                // Estatísticas Par/Ímpar
+                const cellEstatisticas = document.createElement('td');
+                cellEstatisticas.className = 'px-3 py-4 whitespace-nowrap text-center';
+                
+                const stats = calcularEstatisticasParImpar(data.dezenasSorteadasOrdemSorteio);
+                const spanStats = document.createElement('span');
+                spanStats.className = 'inline-flex items-center px-2 py-1 text-xs font-bold rounded-full';
+                
+                // Cores baseadas na maioria
+                if (stats.maioria === 'pares') {
+                    spanStats.className += ' bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+                } else if (stats.maioria === 'impares') {
+                    spanStats.className += ' bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+                } else {
+                    spanStats.className += ' bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+                }
+                
+                spanStats.textContent = stats.texto;
+                spanStats.title = `${stats.pares} números pares e ${stats.impares} números ímpares`;
+                
+                cellEstatisticas.appendChild(spanStats);
+                row.appendChild(cellEstatisticas);
 
                 // Mês da Sorte (usando nomeTimeCoracaoMesSorte)
                 const cellMes = document.createElement('td');

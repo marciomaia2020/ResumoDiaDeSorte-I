@@ -296,6 +296,94 @@
                 </div>
             </div>
 
+            <!-- Análise Visual por Posição -->
+            <div id="analiseVisual" class="hidden mt-6 p-4 bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900 dark:to-blue-900 rounded-lg border border-green-200 dark:border-green-700">
+                <h4 class="text-lg font-semibold text-green-800 dark:text-green-200 mb-3 text-center">
+                    📊 Análise Visual - Números que Saíram por Posição
+                </h4>
+                
+                <!-- Controle de jogos a analisar -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
+                    <label class="text-sm font-medium text-green-700 dark:text-green-300">
+                        Analisar últimos:
+                    </label>
+                    <input 
+                        type="number" 
+                        id="jogosAnalisar" 
+                        value="31"
+                        min="1"
+                        max="100"
+                        placeholder="Nº de jogos"
+                        class="px-3 py-2 text-base border border-green-300 dark:border-green-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white w-24"
+                    >
+                    <span class="text-sm text-green-700 dark:text-green-300">jogos mais recentes</span>
+                    <button 
+                        id="atualizarAnalise" 
+                        class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 text-sm"
+                    >
+                        🔄 Atualizar
+                    </button>
+                </div>
+                
+                <p class="text-sm text-green-700 dark:text-green-300 text-center mb-4">
+                    ✅ = Número saiu nesta posição | Em branco = Número NÃO saiu
+                </p>
+                
+                <!-- Tabela visual -->
+                <div class="overflow-x-auto">
+                    <table id="tabelaAnaliseVisual" class="w-full border border-green-300 dark:border-green-600 rounded-lg">
+                        <!-- Tabela será gerada dinamicamente -->
+                    </table>
+                </div>
+                
+                <!-- Resumo estatístico -->
+                <div id="resumoAnaliseVisual" class="mt-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
+                    <!-- Resumo será inserido aqui -->
+                </div>
+                
+                <!-- Números que NÃO saíram por posição - Como na planilha -->
+                <div class="mt-6 p-4 bg-blue-100 dark:bg-blue-800 rounded-lg">
+                    <p class="text-sm font-medium text-blue-800 dark:text-blue-200 mb-3 text-center">
+                        NÚMEROS QUE NÃO SAÍRAM NOS ÚLTIMOS <span id="jogosEscolhidos">31</span> JOGOS POR POSIÇÃO:
+                    </p>
+                    
+                    <!-- Tabela dos números que faltam por posição -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full border border-blue-300 dark:border-blue-600 rounded-lg bg-white dark:bg-gray-800">
+                            <thead class="bg-blue-200 dark:bg-blue-700">
+                                <tr>
+                                    <th class="px-3 py-2 text-center text-sm font-bold text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-600">
+                                        Bola 1
+                                    </th>
+                                    <th class="px-3 py-2 text-center text-sm font-bold text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-600">
+                                        Bola 2
+                                    </th>
+                                    <th class="px-3 py-2 text-center text-sm font-bold text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-600">
+                                        Bola 3
+                                    </th>
+                                    <th class="px-3 py-2 text-center text-sm font-bold text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-600">
+                                        Bola 4
+                                    </th>
+                                    <th class="px-3 py-2 text-center text-sm font-bold text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-600">
+                                        Bola 5
+                                    </th>
+                                    <th class="px-3 py-2 text-center text-sm font-bold text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-600">
+                                        Bola 6
+                                    </th>
+                                    <th class="px-3 py-2 text-center text-sm font-bold text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-600">
+                                        Bola 7
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaNumerosNaoSairam" class="bg-blue-50 dark:bg-blue-900">
+                                <!-- Números que não saíram por posição serão inseridos aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
             <!-- Padrões encontrados -->
             <div class="mt-6 p-4 bg-white dark:bg-gray-800 rounded-lg">
                 <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 text-center">
@@ -904,6 +992,52 @@
             return resultadoPorPosicao;
         }
 
+        // Função para calcular números que faltam nos últimos 31 concursos
+        function calcularNumerosFaltando() {
+            if (todosResultados.length < 31) return null;
+
+            // Pegar os últimos 31 concursos ordenados por número (mais recentes)
+            const ultimosConcursos = [...todosResultados]
+                .sort((a, b) => b.numero - a.numero) // Ordem decrescente
+                .slice(0, 31); // Últimos 31
+
+            console.log(`Analisando últimos 31 concursos: ${ultimosConcursos[0].numero} até ${ultimosConcursos[30].numero}`);
+
+            const numerosFaltando = {};
+            
+            // Para cada posição (Bola 1-7)
+            for (let pos = 1; pos <= 7; pos++) {
+                // Criar conjunto dos números que apareceram na posição nos últimos 31 jogos
+                const numerosQueApareceram = new Set();
+                
+                ultimosConcursos.forEach(concurso => {
+                    if (concurso.dezenasSorteadasOrdemSorteio && 
+                        concurso.dezenasSorteadasOrdemSorteio[pos - 1]) {
+                        numerosQueApareceram.add(concurso.dezenasSorteadasOrdemSorteio[pos - 1]);
+                    }
+                });
+                
+                // Números que faltam (de 1 a 31 que NÃO apareceram)
+                const faltando = [];
+                for (let num = 1; num <= 31; num++) {
+                    if (!numerosQueApareceram.has(num)) {
+                        faltando.push(num);
+                    }
+                }
+                
+                numerosFaltando[pos] = faltando.sort((a, b) => a - b); // Ordenar crescente
+                
+                console.log(`Bola ${pos}: Apareceram [${Array.from(numerosQueApareceram).sort((a,b) => a-b).join(',')}]`);
+                console.log(`Bola ${pos}: Faltando [${faltando.join(',')}]`);
+            }
+            
+            return {
+                ultimosConcursos,
+                numerosFaltando,
+                totalAnalisado: ultimosConcursos.length
+            };
+        }
+
         // Função para gerar resumo estatístico
         function gerarResumoEstatistico() {
             if (todosResultados.length === 0) return;
@@ -914,6 +1048,8 @@
             const padroesDiv = document.getElementById('padroes');
             const estatisticasPosicaoDiv = document.getElementById('estatisticasPosicao');
             const dadosPosicoes = document.getElementById('dadosPosicoes');
+            const numerosAtrasadosDiv = document.getElementById('numerosAtrasados');
+            const dadosAtrasados = document.getElementById('dadosAtrasados');
 
             // Calcular estatísticas
             let totalPares = 0, totalImpares = 0;
@@ -1075,7 +1211,247 @@
                 estatisticasPosicaoDiv.classList.add('hidden');
             }
 
+                // Gerar análise visual apenas quando "Ordenar dezenas crescente" está desmarcado
+            if (!ordenarCrescente.checked) {
+                const jogos = parseInt(document.getElementById('jogosAnalisar').value) || 31;
+                if (todosResultados.length >= jogos) {
+                    gerarAnaliseVisual(jogos);
+                }
+            } else {
+                document.getElementById('analiseVisual').classList.add('hidden');
+            }
+
             resumoDiv.classList.remove('hidden');
+        }
+
+        // Função para gerar análise visual dos números que saíram por posição
+        function gerarAnaliseVisual(jogosAnalisar = 31) {
+            console.log('🔥🔥🔥 COMEÇANDO gerarAnaliseVisual - jogos:', jogosAnalisar);
+            console.log('🔥 todosResultados.length:', todosResultados.length);
+            
+            if (todosResultados.length < jogosAnalisar) {
+                console.log(`❌ Dados insuficientes. Necessário: ${jogosAnalisar}, Disponível: ${todosResultados.length}`);
+                return;
+            }
+
+            // Pegar os últimos X concursos ordenados por número (mais recentes)
+            const ultimosConcursos = [...todosResultados]
+                .sort((a, b) => b.numero - a.numero) // Ordem decrescente
+                .slice(0, jogosAnalisar); // Últimos X jogos
+
+            console.log(`✅✅✅ Analisando últimos ${jogosAnalisar} concursos: ${ultimosConcursos[0].numero} até ${ultimosConcursos[jogosAnalisar-1].numero}`);
+            console.log('🔍 Primeiro concurso:', ultimosConcursos[0]);
+            console.log('🔍 Dezenas primeiro:', ultimosConcursos[0]?.dezenasSorteadasOrdemSorteio);
+
+            // ✅ ANALISAR QUAIS NÚMEROS APARECERAM EM CADA POSIÇÃO
+            const numerosQueApareceram = {};
+            
+            // Para cada posição (Bola 1-7)
+            for (let pos = 1; pos <= 7; pos++) {
+                numerosQueApareceram[pos] = new Set();
+                
+                ultimosConcursos.forEach((concurso, index) => {
+                    if (concurso.dezenasSorteadasOrdemSorteio && 
+                        concurso.dezenasSorteadasOrdemSorteio[pos - 1]) {
+                        
+                        // 🔥 CONVERTER STRING PARA NUMBER
+                        const numero = parseInt(concurso.dezenasSorteadasOrdemSorteio[pos - 1]);
+                        numerosQueApareceram[pos].add(numero);
+                        
+                        // Debug primeiros 3 concursos
+                        if (index < 3) {
+                            console.log(`   Concurso ${concurso.numero} - Bola ${pos}: ${numero} (convertido)`);
+                        }
+                    } else if (index < 3) {
+                        console.log(`❌ Concurso ${concurso.numero} - Bola ${pos}: SEM DADOS`);
+                    }
+                });
+            }
+            
+            // 🔥🔥🔥 MOSTRAR RESULTADO COLETADO
+            for (let pos = 1; pos <= 7; pos++) {
+                const numerosArray = Array.from(numerosQueApareceram[pos]).sort((a,b) => a-b);
+                console.log(`🎯🎯🎯 BOLA ${pos} - Total: ${numerosArray.length} números únicos`);
+                console.log(`🎯🎯🎯 BOLA ${pos} - Lista: [${numerosArray.join(', ')}]`);
+            }
+
+            // 🔥 GERAR TABELA VERDE - Números que SAÍRAM
+            const tabela = document.getElementById('tabelaAnaliseVisual');
+            
+            let html = `
+                <thead class="bg-green-200 dark:bg-green-800">
+                    <tr>
+                        <th class="px-3 py-2 text-center text-sm font-bold text-green-800 dark:text-green-200 border border-green-300 dark:border-green-600">
+                            Nº
+                        </th>
+                        <th class="px-3 py-2 text-center text-sm font-bold text-green-800 dark:text-green-200 border border-green-300 dark:border-green-600">
+                            Bola 1
+                        </th>
+                        <th class="px-3 py-2 text-center text-sm font-bold text-green-800 dark:text-green-200 border border-green-300 dark:border-green-600">
+                            Bola 2
+                        </th>
+                        <th class="px-3 py-2 text-center text-sm font-bold text-green-800 dark:text-green-200 border border-green-300 dark:border-green-600">
+                            Bola 3
+                        </th>
+                        <th class="px-3 py-2 text-center text-sm font-bold text-green-800 dark:text-green-200 border border-green-300 dark:border-green-600">
+                            Bola 4
+                        </th>
+                        <th class="px-3 py-2 text-center text-sm font-bold text-green-800 dark:text-green-200 border border-green-300 dark:border-green-600">
+                            Bola 5
+                        </th>
+                        <th class="px-3 py-2 text-center text-sm font-bold text-green-800 dark:text-green-200 border border-green-300 dark:border-green-600">
+                            Bola 6
+                        </th>
+                        <th class="px-3 py-2 text-center text-sm font-bold text-green-800 dark:text-green-200 border border-green-300 dark:border-green-600">
+                            Bola 7
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800">
+            `;
+
+            // Para cada número de 1 a 31
+            for (let num = 1; num <= 31; num++) {
+                html += `<tr class="hover:bg-green-50 dark:hover:bg-green-900">`;
+                
+                // Número da linha
+                html += `
+                    <td class="px-3 py-2 text-center font-bold text-gray-700 dark:text-gray-300 border border-green-300 dark:border-green-600 bg-green-100 dark:bg-green-800">
+                        ${num}
+                    </td>
+                `;
+                
+                // Para cada bola (1-7)
+                for (let pos = 1; pos <= 7; pos++) {
+                    const saiu = numerosQueApareceram[pos].has(num);
+                    html += `
+                        <td class="px-3 py-2 text-center border border-green-300 dark:border-green-600">
+                            ${saiu ? '✅' : ''}
+                        </td>
+                    `;
+                }
+                
+                html += `</tr>`;
+            }
+
+            html += '</tbody>';
+            tabela.innerHTML = html;
+
+            // Gerar resumo estatístico
+            const resumo = document.getElementById('resumoAnaliseVisual');
+            let resumoHTML = '';
+            
+            for (let pos = 1; pos <= 7; pos++) {
+                const totalSaiu = numerosQueApareceram[pos].size;
+                const totalFaltando = 31 - totalSaiu;
+                
+                resumoHTML += `
+                    <div class="bg-white dark:bg-gray-800 p-3 rounded-lg border border-green-300 dark:border-green-600 text-center">
+                        <div class="text-xs font-medium text-green-700 dark:text-green-300 mb-1">Bola ${pos}</div>
+                        <div class="text-lg font-bold text-green-600 dark:text-green-400">${totalSaiu}/31</div>
+                        <div class="text-xs text-green-500 dark:text-green-400">${totalFaltando} faltando</div>
+                    </div>
+                `;
+            }
+            
+            resumo.innerHTML = resumoHTML;
+
+            // ✅ GERAR TABELA AZUL - Números que NÃO saíram por posição
+            const numerosFaltandoPorPosicao = {};
+            
+            // Para cada posição, calcular quais números NÃO apareceram
+            for (let pos = 1; pos <= 7; pos++) {
+                const numerosFaltando = [];
+                
+                // Verificar cada número de 1-31
+                for (let num = 1; num <= 31; num++) {
+                    if (!numerosQueApareceram[pos].has(num)) {
+                        numerosFaltando.push(num);
+                    }
+                }
+                
+                numerosFaltandoPorPosicao[pos] = numerosFaltando.sort((a, b) => a - b);
+                console.log(`🔵 Bola ${pos} - Números que NÃO saíram: [${numerosFaltando.join(', ')}]`);
+            }
+            
+            // Gerar HTML da tabela azul
+            const tabelaNumerosNaoSairam = document.getElementById('tabelaNumerosNaoSairam');
+            const maxNumerosFaltando = Math.max(...Object.values(numerosFaltandoPorPosicao).map(arr => arr.length));
+            
+            if (maxNumerosFaltando === 0) {
+                tabelaNumerosNaoSairam.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-3 py-4 text-center font-medium text-green-600 dark:text-green-400 border border-blue-300 dark:border-blue-600">
+                            ✅ Todos os números de 1-31 saíram em todas as posições nos últimos ${jogosAnalisar} jogos!
+                        </td>
+                    </tr>
+                `;
+            } else {
+                let htmlNaoSairam = '';
+                
+                for (let linha = 0; linha < maxNumerosFaltando; linha++) {
+                    htmlNaoSairam += '<tr>';
+                    
+                    for (let pos = 1; pos <= 7; pos++) {
+                        const numerosFaltando = numerosFaltandoPorPosicao[pos];
+                        const numero = linha < numerosFaltando.length ? numerosFaltando[linha] : '';
+                        
+                        htmlNaoSairam += `
+                            <td class="px-3 py-2 text-center font-medium text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-600">
+                                ${numero}
+                            </td>
+                        `;
+                    }
+                    
+                    htmlNaoSairam += '</tr>';
+                }
+                
+                tabelaNumerosNaoSairam.innerHTML = htmlNaoSairam;
+            }
+            
+            // Atualizar elemento de jogos escolhidos
+            document.getElementById('jogosEscolhidos').textContent = jogosAnalisar;
+
+            // Mostrar análise visual
+            document.getElementById('analiseVisual').classList.remove('hidden');
+        }
+
+        // Event listeners para análise visual
+        document.getElementById('atualizarAnalise').addEventListener('click', () => {
+            const jogos = parseInt(document.getElementById('jogosAnalisar').value) || 31;
+            if (jogos < 1 || jogos > 100) {
+                // Usar modal personalizada ao invés de alert
+                mostrarModal('Erro', 'Por favor, insira um valor entre 1 e 100 jogos.');
+                return;
+            }
+            if (todosResultados.length < jogos) {
+                mostrarModal('Dados Insuficientes', `Não há dados suficientes. Disponível: ${todosResultados.length} jogos, Solicitado: ${jogos}`);
+                return;
+            }
+            gerarAnaliseVisual(jogos);
+        });
+
+        // Enter no campo de jogos a analisar
+        document.getElementById('jogosAnalisar').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('atualizarAnalise').click();
+            }
+        });
+
+        // Função para mostrar modal personalizada
+        function mostrarModal(titulo, mensagem) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full mx-4">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">${titulo}</h3>
+                    <p class="text-gray-700 dark:text-gray-300 mb-4">${mensagem}</p>
+                    <div class="flex justify-end">
+                        <button class="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded" onclick="this.closest('.fixed').remove()">OK</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
         }
 
         // 🚀 CARREGAR TODOS OS CONCURSOS AUTOMATICAMENTE AO ABRIR A APP

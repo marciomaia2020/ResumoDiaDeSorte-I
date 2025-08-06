@@ -181,6 +181,16 @@
             <span id="erroMsg"></span>
         </div>
 
+        <!-- Botão Toggle Tabela -->
+        <div id="toggleTabelaContainer" class="hidden mb-4 text-center">
+            <button 
+                id="toggleTabelaBtn" 
+                class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200"
+            >
+                👁️ Ocultar Tabela de Resultados
+            </button>
+        </div>
+
         <!-- Tabela de Resultados -->
         <div id="resultados" class="hidden">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
@@ -842,6 +852,9 @@
 
             resultados.classList.remove('hidden');
             
+            // Mostrar botão toggle quando a tabela aparecer
+            document.getElementById('toggleTabelaContainer').classList.remove('hidden');
+            
             // Aplicar filtros existentes
             aplicarFiltros();
         }
@@ -1453,6 +1466,24 @@
             `;
             document.body.appendChild(modal);
         }
+
+        // Event listener para toggle da tabela
+        document.getElementById('toggleTabelaBtn').addEventListener('click', () => {
+            const resultados = document.getElementById('resultados');
+            const toggleBtn = document.getElementById('toggleTabelaBtn');
+            
+            if (resultados.classList.contains('hidden')) {
+                // Mostrar tabela
+                resultados.classList.remove('hidden');
+                toggleBtn.textContent = '👁️ Ocultar Tabela de Resultados';
+                toggleBtn.className = 'bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200';
+            } else {
+                // Ocultar tabela
+                resultados.classList.add('hidden');
+                toggleBtn.textContent = '👁️ Mostrar Tabela de Resultados';
+                toggleBtn.className = 'bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200';
+            }
+        });
 
         // 🚀 CARREGAR TODOS OS CONCURSOS AUTOMATICAMENTE AO ABRIR A APP
         document.addEventListener('DOMContentLoaded', async () => {

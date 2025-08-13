@@ -508,14 +508,25 @@
                         <label class="text-sm font-medium text-green-700 dark:text-green-300 block mb-2">
                             Quantidade de jogos:
                         </label>
-                        <input 
+                        <!--
+						<input 
                             type="number" 
                             id="quantidadeJogos1" 
                             value="1"
                             min="1"
-                            max="24"
+                            max="3"
                             class="px-3 py-1 text-base border border-green-300 dark:border-green-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white w-20 text-center"
                         >
+						-->
+						<input 
+							type="number" 
+							id="quantidadeJogos1" 
+							value="1"
+							min="1"
+							max="3"
+							step="1"
+							class="px-3 py-1 text-base border border-green-300 dark:border-green-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white w-20 text-center"
+						/>
                         <span class="text-xs text-green-600 dark:text-green-400 block mt-1">
                             Máx: 24 jogos (números únicos)
                         </span>
@@ -2686,6 +2697,15 @@
         document.addEventListener('DOMContentLoaded', async () => {
             carregarTodosOsConcursos();
         });
+		document.getElementById('quantidadeJogos1').addEventListener('input', function () {
+			let val = parseInt(this.value, 10);
+
+			if (isNaN(val) || val < 1) {
+				this.value = 1; // valor mínimo
+			} else if (val > 3) {
+				this.value = 3; // valor máximo
+			}
+		});
     </script>
 </body>
 </html>

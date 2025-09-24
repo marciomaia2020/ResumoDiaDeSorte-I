@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resultados Ordem de Sorteio</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="./css/styles.css">
-    <script src="./js/scripts.js"></script>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="../js/scripts.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -140,16 +140,36 @@
             color: #60a5fa;
             border: 2px solid #2563eb;
         }
+		.controls-title {
+            color: #D4B31A;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+		.header {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            margin-bottom: 20px !important;
+        }
+		
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            padding: 20px;
+            margin-bottom: 40px;
+        }
     </style>
 </head>
 <body class="bg-light-bg dark:bg-dark-bg min-h-screen">
-    <div class="container mx-auto px-4 py-8">
         <!-- Header -->
-        <div class="text-center mb-8">
-            <img src="https://i.postimg.cc/3R2PytCp/diadesorte.png" alt="Dia de Sorte Logo" class="logo"><br />
-            <p class="text-gray-600 dark:text-gray-300 mb-4">
-                Resultados oficiais da Caixa Econômica Federal
-            </p>
+		<div class="header">
+		<div class="logo"></div>
+			<h1>Resultados oficiais da Caixa Econômica Federal</h1>
+		</div>
             
             <!-- Botão Como Funciona Principal -->
             <div class="flex justify-center">
@@ -160,7 +180,6 @@
                     📖 COMO FUNCIONA - Guia Completo
                 </button>
             </div>
-        </div>
 
         <!-- Controles -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
@@ -1283,6 +1302,7 @@
             </div>
         </div>
     </div>
+
 
     <script>
         // Detectar tema escuro
